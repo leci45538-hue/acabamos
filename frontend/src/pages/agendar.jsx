@@ -4,6 +4,8 @@ import Footer from '../components/Layout/Footer';
 import CalendarPicker from '../components/Scheduling/CalendarPicker';
 import ServiceSelector from '../components/Scheduling/ServiceSelector';
 import PriceCalculator from '../components/Scheduling/PriceCalculator';
+import PhotoUpload from '../components/Scheduling/PhotoUpload';
+import RecurringBookings from '../components/Scheduling/RecurringBookings';
 import { useToast } from '../context/ToastContext';
 import { LoadingOverlay } from '../components/UI/LoadingSpinner';
 
@@ -16,6 +18,7 @@ export default function Agendar() {
   const [photos, setPhotos] = useState([]);
   const [location, setLocation] = useState(null);
   const [notes, setNotes] = useState('');
+  const [recurringConfig, setRecurringConfig] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
 
@@ -55,6 +58,7 @@ export default function Agendar() {
         photos,
         location,
         notes,
+        recurring: recurringConfig,
         totalPrice: calculateTotal(),
       };
       
@@ -89,6 +93,7 @@ export default function Agendar() {
       setPhotos([]);
       setLocation(null);
       setNotes('');
+      setRecurringConfig(null);
       
     } catch (error) {
       console.error('Erro ao processar agendamento:', error);
@@ -137,8 +142,9 @@ export default function Agendar() {
           )}
 
           {step === 3 && (
-            <div>
+            <div className="space-y-8">
               <h3 className="text-xl font-bold mb-6">Localização e Detalhes</h3>
+              
               <div className="space-y-6">
                 <div>
                   <label className="block font-semibold mb-2">Endereço Completo</label>
@@ -160,16 +166,10 @@ export default function Agendar() {
                     className="w-48 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
                   />
                 </div>
-                <div>
-                  <label className="block font-semibold mb-2">Fotos (no momento do agendamento)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => setPhotos(Array.from(e.target.files))}
-                    className="w-full"
-                  />
-                </div>
+
+                {/* Photo Upload - NOVO */}
+                <PhotoUpload onPhotosChange={setPhotos} maxPhotos={5} />
+
                 <div>
                   <label className="block font-semibold mb-2">Localização em tempo real</label>
                   <div className="flex gap-2 items-center">
@@ -179,16 +179,17 @@ export default function Agendar() {
                         navigator.geolocation.getCurrentPosition((pos) => {
                           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                           setLocation(coords);
+                          addToast('Localização capturada!', 'success');
                         }, (err) => {
-                          alert('Não foi possível obter localização: ' + err.message);
+                          addToast('Não foi possível obter localização: ' + err.message, 'error');
                         }, { enableHighAccuracy: true });
                       }}
                       type="button"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                     >
-                      Capturar localização atual
+                      📍 Capturar Localização
                     </button>
-                    <span className="text-sm text-gray-600">{location ? `Lat ${location.lat.toFixed(5)}, Lng ${location.lng.toFixed(5)}` : 'Nenhuma localização capturada'}</span>
+                    <span className="text-sm text-gray-600">{location ? `✓ Lat ${location.lat.toFixed(5)}, Lng ${location.lng.toFixed(5)}` : 'Nenhuma'}</span>
                   </div>
                 </div>
                 <div>
@@ -201,6 +202,9 @@ export default function Agendar() {
                     rows="4"
                   />
                 </div>
+
+                {/* Recurring Bookings - NOVO */}
+                <RecurringBookings onRecurringChange={setRecurringConfig} />
               </div>
             </div>
           )}
@@ -229,6 +233,10 @@ export default function Agendar() {
                 </div>
                 <div className="pt-4">
                   <PriceCalculator services={selectedServices} date={selectedDate} />
+                </div>
+                <div className="pt-4 border-t">
+                  <p className="font-semibold text-gray-600 mb-2">🔄 Recorrência</p>
+                  <p className="text-lg">{recurringConfig?.isRecurring ? `${recurringConfig.frequency} - ${recurringConfig.repetitions}x (${recurringConfig.discountPercentage}% desconto)` : 'Sem recorrência'}</p>
                 </div>
               </div>
             </div>
