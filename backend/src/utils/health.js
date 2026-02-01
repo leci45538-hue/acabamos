@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('./logger');
 
-const DB_PATH = path.join(__dirname, '..', 'backend_data', 'limpeza.db');
+const DB_PATH = path.join(__dirname, '..', '..', 'backend_data', 'limpeza.db');
 
 async function checkDatabase() {
   return new Promise((resolve) => {
