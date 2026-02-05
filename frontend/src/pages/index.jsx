@@ -10,6 +10,7 @@ import FAQ from '../components/UI/FAQ'
 import BlogSection from '../components/UI/BlogSection'
 import FeaturedServices from '../components/UI/FeaturedServices'
 import BenefitsSection from '../components/UI/BenefitsSection'
+import MetricsDashboard from '../components/UI/MetricsDashboard'
 import TeamSection from '../components/UI/TeamSection'
 import VideoTestimonials from '../components/UI/VideoTestimonials'
 import { motion } from 'framer-motion'
@@ -592,6 +593,9 @@ export default function Home() {
 
           {/* Benefits Section */}
           <BenefitsSection />
+
+          {/* Metrics Dashboard */}
+          <MetricsDashboard />
 
           {/* Advanced Features */}
           <section className="py-20 sm:py-32 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-900 dark:to-slate-800">
