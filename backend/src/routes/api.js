@@ -517,4 +517,12 @@ router.use('/admin', authenticateToken, authorizeRole(['admin']), adminRoutes);
 const blogRoutes = require('./blogRoutes');
 router.use('/blog', blogRoutes);
 
+// ===== OAUTH 2.0 AUTHENTICATION =====
+const OAuthController = require('../controllers/OAuthController');
+router.use('/auth', OAuthController);
+
+// ===== SWAGGER DOCUMENTATION =====
+const swaggerRoutes = require('./swagger');
+router.use('/', swaggerRoutes);
+
 module.exports = router;
