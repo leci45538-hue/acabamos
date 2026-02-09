@@ -6,7 +6,7 @@
  */
 
 const Queue = require('bull');
-const winston = require('winston');
+const logger = require('../utils/logger');
 const EmailService = require('./EmailService');
 const MonitoringService = require('./MonitoringService');
 const RedisService = require('./RedisService');
@@ -86,7 +86,7 @@ class EmailQueueService {
   setupEventListeners() {
     // Quando um job é completado com sucesso
     this.queue.on('completed', (job) => {
-      winston.info('📧 Email enviado com sucesso', {
+      logger.info('📧 Email enviado com sucesso', {
         jobId: job.id,
         type: job.data.type,
         to: job.data.to,
@@ -101,7 +101,7 @@ class EmailQueueService {
 
     // Quando um job falha após todas as tentativas
     this.queue.on('failed', (job, err) => {
-      winston.error('❌ Email falhou após retries', {
+      logger.error('❌ Email falhou após retries', {
         jobId: job.id,
         type: job.data.type,
         to: job.data.to,
@@ -122,7 +122,7 @@ class EmailQueueService {
 
     // Quando um job é retentado
     this.queue.on('stalled', (job) => {
-      winston.warn('⚠️ Job travou, será retentado', {
+      logger.warn('⚠️ Job travou, será retentado', {
         jobId: job.id,
         type: job.data.type,
         timestamp: new Date().toISOString(),
@@ -153,7 +153,7 @@ class EmailQueueService {
         }
       );
 
-      winston.info('📧 Email de confirmação enfileirado', {
+      logger.info('📧 Email de confirmação enfileirado', {
         jobId: job.id,
         to: clientEmail,
         bookingId: bookingData.id,
@@ -161,7 +161,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar email de confirmação', { error: error.message });
+      logger.error('❌ Erro ao enfileirar email de confirmação', { error: error.message });
       throw error;
     }
   }
@@ -187,7 +187,7 @@ class EmailQueueService {
         }
       );
 
-      winston.info('📧 Lembrança enfileirada', {
+      logger.info('📧 Lembrança enfileirada', {
         jobId: job.id,
         to: clientEmail,
         bookingId: bookingData.id,
@@ -195,7 +195,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar lembrança', { error: error.message });
+      logger.error('❌ Erro ao enfileirar lembrança', { error: error.message });
       throw error;
     }
   }
@@ -222,7 +222,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar confirmação de pagamento', { error: error.message });
+      logger.error('❌ Erro ao enfileirar confirmação de pagamento', { error: error.message });
       throw error;
     }
   }
@@ -249,7 +249,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar notificação de reembolso', {
+      logger.error('❌ Erro ao enfileirar notificação de reembolso', {
         error: error.message,
       });
       throw error;
@@ -278,7 +278,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar notificação de avaliação', {
+      logger.error('❌ Erro ao enfileirar notificação de avaliação', {
         error: error.message,
       });
       throw error;
@@ -308,7 +308,7 @@ class EmailQueueService {
 
       return { success: true, jobId: job.id };
     } catch (error) {
-      winston.error('❌ Erro ao enfileirar email genérico', { error: error.message });
+      logger.error('❌ Erro ao enfileirar email genérico', { error: error.message });
       throw error;
     }
   }
@@ -328,7 +328,7 @@ class EmailQueueService {
         attempt: job.attemptsMade + 1,
       };
     } catch (error) {
-      winston.error('❌ Erro processando confirmação de agendamento', {
+      logger.error('❌ Erro processando confirmação de agendamento', {
         jobId: job.id,
         error: error.message,
         attempt: job.attemptsMade + 1,
@@ -348,7 +348,7 @@ class EmailQueueService {
         attempt: job.attemptsMade + 1,
       };
     } catch (error) {
-      winston.error('❌ Erro processando lembrança', {
+      logger.error('❌ Erro processando lembrança', {
         jobId: job.id,
         error: error.message,
       });
@@ -367,7 +367,7 @@ class EmailQueueService {
         processedAt: new Date().toISOString(),
       };
     } catch (error) {
-      winston.error('❌ Erro processando confirmação de pagamento', {
+      logger.error('❌ Erro processando confirmação de pagamento', {
         jobId: job.id,
         error: error.message,
       });
@@ -386,7 +386,7 @@ class EmailQueueService {
         processedAt: new Date().toISOString(),
       };
     } catch (error) {
-      winston.error('❌ Erro processando notificação de reembolso', {
+      logger.error('❌ Erro processando notificação de reembolso', {
         jobId: job.id,
         error: error.message,
       });
@@ -405,7 +405,7 @@ class EmailQueueService {
         processedAt: new Date().toISOString(),
       };
     } catch (error) {
-      winston.error('❌ Erro processando notificação de avaliação', {
+      logger.error('❌ Erro processando notificação de avaliação', {
         jobId: job.id,
         error: error.message,
       });
@@ -424,7 +424,7 @@ class EmailQueueService {
         messageId: result.messageId,
       };
     } catch (error) {
-      winston.error('❌ Erro processando email genérico', {
+      logger.error('❌ Erro processando email genérico', {
         jobId: job.id,
         error: error.message,
       });
@@ -475,12 +475,12 @@ class EmailQueueService {
       // Enviar email ao admin (não usar fila para evitar loop infinito)
       // await this.emailService.sendAdminAlert(adminEmail, failureMessage);
 
-      winston.error('📧 Admin alertado sobre falha de email', {
+      logger.error('📧 Admin alertado sobre falha de email', {
         jobId: job.id,
         adminEmail,
       });
     } catch (error) {
-      winston.error('❌ Erro ao notificar admin', { error: error.message });
+      logger.error('❌ Erro ao notificar admin', { error: error.message });
     }
   }
 
@@ -493,7 +493,7 @@ class EmailQueueService {
         const counts = await this.queue.getJobCounts();
 
         // Logs estruturados para observabilidade
-        winston.info('📊 Queue Health Check', {
+        logger.info('📊 Queue Health Check', {
           active: counts.active,
           waiting: counts.waiting,
           completed: counts.completed,
@@ -504,7 +504,7 @@ class EmailQueueService {
 
         // Se muitos jobs falhados, alertar
         if (counts.failed > 50) {
-          winston.error('🚨 Muitos emails falhados!', {
+          logger.error('🚨 Muitos emails falhados!', {
             failedCount: counts.failed,
             recommendation: 'Verificar credenciais de email e conexão Redis',
           });
@@ -512,12 +512,12 @@ class EmailQueueService {
 
         // Se muitos jobs aguardando, alertar
         if (counts.waiting > 1000) {
-          winston.warn('⚠️ Fila de emails crescendo', {
+          logger.warn('⚠️ Fila de emails crescendo', {
             waitingCount: counts.waiting,
           });
         }
       } catch (error) {
-        winston.error('❌ Erro no health check da fila', { error: error.message });
+        logger.error('❌ Erro no health check da fila', { error: error.message });
       }
     }, 60000); // A cada 1 minuto
   }
@@ -537,7 +537,7 @@ class EmailQueueService {
         total: counts.active + counts.waiting + counts.delayed,
       };
     } catch (error) {
-      winston.error('❌ Erro ao obter stats da fila', { error: error.message });
+      logger.error('❌ Erro ao obter stats da fila', { error: error.message });
       return null;
     }
   }
@@ -551,10 +551,10 @@ class EmailQueueService {
       const removed = await Promise.all(
         failedJobs.slice(0, -50).map((job) => job.remove()) // Manter os últimos 50
       );
-      winston.info(`🧹 Limpeza de jobs: ${removed.length} removidos`);
+      logger.info(`🧹 Limpeza de jobs: ${removed.length} removidos`);
       return removed.length;
     } catch (error) {
-      winston.error('❌ Erro ao limpar jobs falhados', { error: error.message });
+      logger.error('❌ Erro ao limpar jobs falhados', { error: error.message });
     }
   }
 
@@ -567,10 +567,10 @@ class EmailQueueService {
       for (const job of failedJobs) {
         await job.retry(); // Vai respeitar o backoff
       }
-      winston.info(`🔄 ${failedJobs.length} jobs reenfileirados para retry`);
+      logger.info(`🔄 ${failedJobs.length} jobs reenfileirados para retry`);
       return failedJobs.length;
     } catch (error) {
-      winston.error('❌ Erro ao reprocessar jobs', { error: error.message });
+      logger.error('❌ Erro ao reprocessar jobs', { error: error.message });
     }
   }
 }

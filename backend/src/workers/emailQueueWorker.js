@@ -13,28 +13,8 @@
  */
 
 require('dotenv').config();
-const winston = require('winston');
+const logger = require('../utils/logger');
 const EmailQueueService = require('../services/EmailQueueService');
-
-// Configurar logger
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'email-queue-worker' },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.simple(),
-    }),
-    new winston.transports.File({ filename: 'logs/email-queue-worker.log' }),
-    new winston.transports.File({ filename: 'logs/email-queue-error.log', level: 'error' }),
-  ],
-});
-
-console.error = (...args) => logger.error(args.join(' '));
 
 class EmailQueueWorker {
   constructor() {
