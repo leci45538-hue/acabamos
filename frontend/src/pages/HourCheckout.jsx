@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import HourCalculator from '../components/Pricing/HourCalculator';
+import HourPriceCalculator from '../components/Pricing/HourPriceCalculator';
 
 const HourCheckout = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -124,9 +124,9 @@ const HourCheckout = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Calculadora */}
           <div className="lg:col-span-2">
-            <HourCalculator
-              onCalculate={handleCalculate}
-              userId={typeof window !== 'undefined' ? localStorage.getItem('userId') : null}
+            <HourPriceCalculator
+              onPriceChange={handleCalculate}
+              multipleSites={false}
             />
           </div>
 
